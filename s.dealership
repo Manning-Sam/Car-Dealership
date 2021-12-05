@@ -1,0 +1,220 @@
+create table car(
+	vin_num serial primary key,
+	year varchar(4),
+	make varchar(25),
+	model varchar(25),
+	used boolean,
+	sold boolean);
+	
+create table salesperson(
+	sales_id serial primary key,
+	first_name varchar(25),
+	last_name varchar(25));
+	
+create table customer(
+	customer_id serial primary key,
+	fist_name varchar(25),
+	lat_name varchar(25));
+	
+create table mechanic(
+	mechanic_id serial primary key,
+	first_name varchar(25),
+	last_name varchar(25));
+	
+create table parts(
+	part_id serial primary key,
+	part_name varchar(30),
+	price numeric);
+	
+create table invoice(
+	PO_id serial primary key,
+	price numeric,
+	date_of_purchase date,
+	customer_id integer not null,
+	foreign key (customer_id) references customer(customer_id),
+	vin_num integer not null,
+	foreign key (vin_num) references car(vin_num),
+	sales_id integer not null,
+	foreign key (sales_id) references salesperson(sales_id));
+
+create table service_ticket(
+	st_id serial primary key,
+	service_type varchar(30),
+	total_cost numeric,
+	time_of_service date,
+	customer_id integer not null,
+	foreign key (customer_id) references customer(customer_id),
+	vin_num integer not null,
+	foreign key (vin_num) references car(vin_num),
+	mechanic_id integer not null,
+	foreign key (mechanic_id) references mechanic(mechanic_id),
+	part_id integer not null,
+	foreign key (part_id) references parts(part_id));
+
+create table service_record(
+	record_id serial primary key,
+	st_id integer not null,
+	foreign key (st_id) references service_ticket(st_id));
+
+alter table customer rename column lat_name to last_name; 
+alter table customer rename column fist_name to first_name;
+
+select * from car;
+select * from salesperson;
+select * from mechanic;
+select * from customer;
+select * from parts;
+select * from invoice;
+select * from service_ticket;
+select * from service_record;
+
+insert into car(
+	year,
+	make,
+	model,
+	used,
+	sold)
+values(
+	2003,
+	'mercury',
+	'mountaineer',
+	'yes',
+	'yes');
+
+insert into car(
+	year,
+	make,
+	model,
+	used,
+	sold)
+values(
+	2019,
+	'toyota',
+	'corolla',
+	'yes',
+	'yes');
+
+insert into salesperson(
+	first_name,
+	last_name)
+values(
+	'John',
+	'Finnan'
+),(
+	'Dorian',
+	'Finn');
+
+insert into mechanic(
+	first_name,
+	last_name)
+values(
+	'Lizzie',
+	'Schutte'
+),(
+	'Brayden',
+	'Gray');
+
+insert into customer(
+	first_name,
+	last_name)
+values(
+	'Jenny',
+	'Fitz'
+),(
+	'Guy',
+	'Man');
+	
+insert into parts(
+	part_name,
+	price)
+values(
+	'tires',
+	100),(
+	'tire_rods',
+	200),(
+	'brake_pads',
+	80);
+	
+UPDATE parts
+SET part_name = 'tie rod', price = 200
+WHERE part_id = 2;
+
+UPDATE parts
+SET part_name = 'brake pad', price = 80
+WHERE part_id = 3;
+
+insert into invoice(
+	price,
+	date_of_purchase,
+	vin_num,
+	customer_id,
+	sales_id)
+values(
+	12000,
+	current_timestamp,
+	1,
+	1,
+	1),(
+	23000,
+	current_timestamp,
+	2,
+	2,
+	2);
+
+insert into service_ticket(
+	total_cost,
+	time_of_service,
+	vin_num,
+	customer_id,
+	mechanic_id,
+	service_type,
+	part_id)
+values(
+	400,
+	current_timestamp,
+	1,
+	1,
+	1,
+	'tire replacement',
+	1),(
+	200,
+	current_timestamp,
+	2,
+	2,
+	2,
+	'tie rod replacement',
+	2);
+
+insert into service_record(
+	st_id)
+values
+(1),(2);
+
+CREATE OR REPLACE FUNCTION add_mechanic(_mechanic_id INTEGER, _first_name VARCHAR, _last_name VARCHAR)
+RETURNS void 
+AS $MAIN$
+BEGIN
+	INSERT INTO mechanic(mechanic_id,first_name,last_name)
+	VALUES(_mechanic_id, _first_name, _last_name);
+END;
+$MAIN$
+LANGUAGE plpgsql;
+
+SELECT add_mechanic(3,'Suzzie', 'Shepherd');
+
+SELECT *
+FROM mechanic
+WHERE mechanic_id = 3;
+
+CREATE OR REPLACE FUNCTION add_part(_part_id INTEGER, _part_name VARCHAR, _price numeric)
+RETURNS void 
+AS $MAIN$
+BEGIN
+	INSERT INTO parts(part_id,part_name,price)
+	VALUES(_part_id, _part_name, price);
+END;
+$MAIN$
+LANGUAGE plpgsql;
+
+SELECT add_part(4,'oil', 40);
+	
